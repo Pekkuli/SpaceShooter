@@ -1,5 +1,6 @@
 package GameObjects;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -17,47 +18,42 @@ public class game {
 
     private static player player;
 
-    private static ArrayList<asteroid> asteroids;
+//    private static ArrayList<asteroid> asteroids;
     private static ArrayList<String> input;
 
     private static double dimX;
     private static double dimY;
 
-    private double mouseX;
-    private double mouseY;
-
     private static Scene gameScene;
     private static Pane gameBox;
-    private static ImageView background;
-    private static HBox optionBox;
     private static Label debugLabel;
 
 
     public game(double x, double y) {
         player = new player(0,0);
-        asteroids = new ArrayList<>();
+//        asteroids = new ArrayList<>();
         input = new ArrayList<>();
         dimX = x;
         dimY = y;
 
         BorderPane root = new BorderPane();
         gameBox = new Pane();
-        optionBox = new HBox();
+        HBox optionBox = new HBox();
         optionBox.setStyle("-fx-background-color: #ffffff;");
         debugLabel = new Label();
 
         Image back = new Image("/images/Background.png",x,y,false,false);
-        background = new ImageView(back);
+        ImageView background = new ImageView(back);
         background.setX(0);
         background.setY(0);
 
-        spawnAsteroid(400,250);
-        spawnAsteroid(550,250);
-
         gameBox.getChildren().add(background);
-        gameBox.getChildren().addAll(asteroids);
+//        gameBox.getChildren().addAll(asteroids);
         gameBox.getChildren().addAll(player);
         gameBox.getChildren().addAll(player.getCANNON());
+
+        spawnAsteroid(400,250);
+        spawnAsteroid(550,250);
 
         Label debug = getDebugLabel();
         optionBox.getChildren().add(debug);
@@ -94,16 +90,20 @@ public class game {
             }
         });
 
-        gameScene.setOnMouseMoved(event -> {
-            mouseX = event.getX();
-            mouseY = event.getY();
-            player.rotateCannon(mouseX,mouseY);
-        });
-
         gameScene.setOnKeyReleased(event -> {
             String keyInput = event.getCode().toString();
             input.remove(keyInput);
         });
+
+        gameScene.setOnMouseDragged(event -> player.rotateCannon(event));
+
+        gameScene.setOnMousePressed(event -> {
+            player.rotateCannon(event);
+            player.startFiring();
+        });
+
+        gameScene.setOnMouseReleased(event -> player.stopFiring());
+
         root.setCenter(gameBox);
         root.setTop(optionBox);
     }
@@ -112,18 +112,18 @@ public class game {
         return gameScene;
     }
 
-    private void updateGameScene(){
-        BorderPane root = new BorderPane();
-        gameScene.setRoot(root);
-        gameBox.getChildren().clear();
-        gameBox.getChildren().add(background);
-        gameBox.getChildren().addAll(asteroids);
-        gameBox.getChildren().addAll(player);
-        gameBox.getChildren().addAll(player.getCANNON());
-        root.setCenter(gameBox);
-        root.setTop(optionBox);
-        updateScene();
-    }
+//    private void updateGameScene(){
+//        BorderPane root = new BorderPane();
+//        gameScene.setRoot(root);
+//        gameBox.getChildren().clear();
+//        gameBox.getChildren().add(background);
+//        gameBox.getChildren().addAll(asteroids);
+//        gameBox.getChildren().addAll(player);
+//        gameBox.getChildren().addAll(player.getCANNON());
+//        root.setCenter(gameBox);
+//        root.setTop(optionBox);
+//        updateScene();
+//    }
 
     public void moveGameObjects() {
         moveCharacter();
@@ -168,70 +168,148 @@ public class game {
 
         player.update((double) 1000/ getUpdateRate());
 
-        if(w){
-            if(!gameBox.getChildren().contains(player.getUP())){
-                gameBox.getChildren().add(player.getUP());
-            }
-        } else {
-            gameBox.getChildren().remove(player.getUP());
-        }
-        if(a){
-            if(!gameBox.getChildren().contains(player.getLEFT())){
-                gameBox.getChildren().add(player.getLEFT());
-            }
-        } else {
-            gameBox.getChildren().remove(player.getLEFT());
-        }
-        if(s){
-            if(!gameBox.getChildren().contains(player.getDOWN())){
-                gameBox.getChildren().add(player.getDOWN());
-            }
-        } else {
-            gameBox.getChildren().remove(player.getDOWN());
-        }
-        if(d){
-            if(!gameBox.getChildren().contains(player.getRIGHT())){
-                gameBox.getChildren().add(player.getRIGHT());
-            }
-        } else {
-            gameBox.getChildren().remove(player.getRIGHT());
-        }
-        player.rotateCannon(mouseX,mouseY);
+        addFlameEffectUP(w,ctrl);
+        addFlameEffectLeft(a,ctrl);
+        addFlameEffectDOWN(s,ctrl);
+        addFlameEffectRIGHT(d,ctrl);
 
-        for(asteroid ast: asteroids){
-            if(ast.intersects(player)){
-                asteroids.remove(ast);
-                updateGameScene();
-                break;
+        player.rotateCannon();
+
+        for(Node nd: gameBox.getChildren()){
+            if(nd instanceof asteroid){
+                asteroid ast = (asteroid) nd;
+                if(ast.intersects(player)){
+                    gameBox.getChildren().remove(ast);
+                    break;
 //                System.out.println("Player is colliding with asteroid: "+ast);
+                }
+            }
+            if(nd instanceof projectile){
+                projectile pro = (projectile) nd;
+                pro.update((double) 1000/ getUpdateRate());
+
+//                if(pro.isOutOfBounds()){
+//                    gameBox.getChildren().remove(pro);
+//                }
             }
         }
     }
 
-    private void spawnAsteroid(double x, double y) {
+    private static void spawnAsteroid(double x, double y) {
         asteroid ast = new asteroid(x,y);
         ast.setPosition(x-ast.getWidth()/2, y-ast.getHeight()/2);
 
-        asteroids.add(ast);
+        gameBox.getChildren().add(ast);
+//        asteroids.add(ast);
     }
 
     private void mouseClick(MouseEvent event){
         System.out.println("game was clicked at: " + event.getX() + "," + event.getY()+" ("+event.getButton()+")");
-
         switch (event.getButton()){
             case PRIMARY:
+//                double deltaX = event.getX() - player.getCenterX();
+//                double deltaY = event.getY() - player.getCenterY();
+//
+//                spawnProjectile(player.getCenterX(),player.getCenterY(),deltaX, deltaY);
 
-                spawnAsteroid(event.getX(),event.getY());
-                updateGameScene();
+//              do left click
 
                 break;
             case SECONDARY:
+
+                spawnAsteroid(event.getX(),event.getY());
+//                do right click
+
                 break;
             case MIDDLE:
+
+//                do middle click
+
                 break;
             case NONE:
                 break;
         }
+    }
+
+    private void addFlameEffectUP(boolean on, boolean ctrl){
+        if(on){
+
+            if (!ctrl){
+                if(!gameBox.getChildren().contains(player.getUP())){
+                    gameBox.getChildren().add(player.getUP());
+                    gameBox.getChildren().remove(player.getUP_SMALL());
+                }
+            } else {
+                if(!gameBox.getChildren().contains(player.getUP_SMALL())){
+                    gameBox.getChildren().add(player.getUP_SMALL());
+                    gameBox.getChildren().remove(player.getUP());
+                }
+            }
+        } else {
+            gameBox.getChildren().remove(player.getUP());
+            gameBox.getChildren().remove(player.getUP_SMALL());
+        }
+    }
+
+    private void addFlameEffectLeft(boolean on, boolean ctrl){
+        if(on){
+            if (!ctrl){
+                if(!gameBox.getChildren().contains(player.getLEFT())){
+                    gameBox.getChildren().add(player.getLEFT());
+                    gameBox.getChildren().remove(player.getLEFT_SMALL());
+                }
+            } else {
+                if(!gameBox.getChildren().contains(player.getLEFT_SMALL())){
+                    gameBox.getChildren().add(player.getLEFT_SMALL());
+                    gameBox.getChildren().remove(player.getLEFT());
+                }
+            }
+        } else {
+            gameBox.getChildren().remove(player.getLEFT());
+            gameBox.getChildren().remove(player.getLEFT_SMALL());
+        }
+    }
+
+    private void addFlameEffectDOWN(boolean on, boolean ctrl){
+        if(on){
+            if (!ctrl){
+                if(!gameBox.getChildren().contains(player.getDOWN())){
+                    gameBox.getChildren().add(player.getDOWN());
+                    gameBox.getChildren().remove(player.getDOWN_SMALL());
+                }
+            } else {
+                if(!gameBox.getChildren().contains(player.getDOWN_SMALL())){
+                    gameBox.getChildren().add(player.getDOWN_SMALL());
+                    gameBox.getChildren().remove(player.getDOWN());
+                }
+            }
+        } else {
+            gameBox.getChildren().remove(player.getDOWN());
+            gameBox.getChildren().remove(player.getDOWN_SMALL());
+        }
+    }
+
+    private void addFlameEffectRIGHT(boolean on, boolean ctrl){
+        if(on){
+            if (!ctrl){
+                if(!gameBox.getChildren().contains(player.getRIGHT())){
+                    gameBox.getChildren().add(player.getRIGHT());
+                    gameBox.getChildren().remove(player.getRIGHT_SMALL());
+                }
+            } else {
+                if(!gameBox.getChildren().contains(player.getRIGHT_SMALL())){
+                    gameBox.getChildren().add(player.getRIGHT_SMALL());
+                    gameBox.getChildren().remove(player.getRIGHT());
+                }
+            }
+        } else {
+            gameBox.getChildren().remove(player.getRIGHT());
+            gameBox.getChildren().remove(player.getRIGHT_SMALL());
+        }
+    }
+
+    static void spawnProjectile(double x, double y, double deltax, double deltay){
+        gameBox.getChildren().add(new projectile(x,y,deltax,deltay));
     }
 
 //    private void changeLevel() {

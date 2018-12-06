@@ -1,9 +1,6 @@
 package GameObjects;
 
-
 import javafx.animation.AnimationTimer;
-import javafx.scene.shape.Circle;
-
 import java.util.Random;
 
 class asteroid extends sprite {
@@ -15,8 +12,6 @@ class asteroid extends sprite {
     private boolean clockwise;
     private long lastUpdate;
     private double spinningFrequency;
-
-
 
     asteroid(double x, double y) {
         super(x,y);
@@ -32,8 +27,8 @@ class asteroid extends sprite {
 
         setOnMouseClicked(event -> {
             System.out.println("Asteroid at: "+getX()+","+getY()+" was clicked!");
-            if(size > minSize+5){
-                size -=5;
+            if(size > minSize+25){
+                size -=25;
                 setImage("/images/asteroidi1.png",size,size);
                 setPosition(x - getWidth()/2, y - getHeight()/2);
                 updateSpinningFreq();
@@ -72,22 +67,20 @@ class asteroid extends sprite {
         spinningFrequency = Math.pow(size / maxSize, 1.5) * 10;
     }
 
+    boolean intersects(sprite s) {
+        double deltaX = Math.abs(getCenterX()-s.getCenterX());
+        double deltaY = Math.abs(getCenterY()-s.getCenterY());
+        double distance = Math.sqrt( Math.pow(deltaX,2) + Math.pow(deltaY,2) );
+
+        return distance <= getWidth()/2 + s.getWidth()/2;
+    }
+
     private static double getRandSize(){
         return new Random().nextDouble() * (maxSize - minSize) + minSize;
     }
-
-//    boolean intersects(sprite s) {
-//        Circle crl = new Circle(getCenterX(),getCenterY(),size/2);
-//        return crl.intersects(s.getX(),s.getY(),s.getWidth(),s.getHeight());
-//        return s.new Circle(getCenterX(),getCenterY(),size).intersects(getBoundary());
-//    }
 
     @Override
     public String toString(){
         return "Position: "+getX()+","+getY()+", Size: "+size;
     }
-
-//    private Circle getBoundary(){
-//        return new Circle(getCenterX(),getCenterY(),size);
-//    }
 }

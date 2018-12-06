@@ -1,21 +1,32 @@
 package GameObjects;
 
-
-import javafx.geometry.Rectangle2D;
+import javafx.animation.AnimationTimer;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 
 import static GameObjects.game.*;
 
+class player extends sprite {
 
-public class player extends sprite {
-
+    private static AnimationTimer firing;
+    private long lastUpdate;
     private double velocityX;
     private double velocityY;
 
+    private double mouseX;
+    private double mouseY;
+
+    private double firingSpeed = 5;
+
     private ImageView UP;
+    private ImageView UP_SMALL;
     private ImageView LEFT;
+    private ImageView LEFT_SMALL;
     private ImageView DOWN;
+    private ImageView DOWN_SMALL;
     private ImageView RIGHT;
+    private ImageView RIGHT_SMALL;
+
     private ImageView CANNON;
 
     player(double x, double y) {
@@ -24,12 +35,42 @@ public class player extends sprite {
 
         velocityX = 0;
         velocityY = 0;
+        mouseX = 0;
+        mouseY = 0;
 
         UP = new ImageView("/images/player/UP.png");
+        UP_SMALL = new ImageView("/images/player/UP_SMALL.png");
+
         LEFT = new ImageView("/images/player/LEFT.png");
+        LEFT_SMALL = new ImageView("/images/player/LEFT_SMALL.png");
+
         DOWN = new ImageView("/images/player/DOWN.png");
+        DOWN_SMALL = new ImageView("/images/player/DOWN_SMALL.png");
+
         RIGHT = new ImageView("/images/player/RIGHT.png");
+        RIGHT_SMALL = new ImageView("/images/player/RIGHT_SMALL.png");
+
         CANNON = new ImageView("/images/player/player_cannon.png");
+
+        lastUpdate = 0L;
+
+        firing = new AnimationTimer() {
+
+            @Override
+            public void handle(long now) {
+
+                long deltaTime = (now - lastUpdate)/1000000;
+                if(deltaTime >= (1000/firingSpeed) ){
+
+                    double deltaX = mouseX - getCenterX();
+                    double deltaY = mouseY - getCenterY();
+
+                    spawnProjectile(getCenterX(),getCenterY(),deltaX, deltaY);
+
+                    lastUpdate = now;
+                }
+            }
+        };
     }
 
     double getVelocityX() {
@@ -40,15 +81,29 @@ public class player extends sprite {
         return velocityY;
     }
 
-    void setVelocity(double X, double Y) {
-        velocityX = X;
-        velocityY = Y;
+    void startFiring(){
+        firing.start();
     }
+
+    void stopFiring(){
+        firing.stop();
+    }
+
+    //    void setVelocity(double X, double Y) {
+//        velocityX = X;
+//        velocityY = Y;
+//    }
 
     ImageView getUP() {
         UP.setX(getX()+20);
         UP.setY(getY() + height);
         return UP;
+    }
+
+    ImageView getUP_SMALL() {
+        UP_SMALL.setX(getX()+22.5);
+        UP_SMALL.setY(getY() + height);
+        return UP_SMALL;
     }
 
     ImageView getLEFT() {
@@ -57,10 +112,22 @@ public class player extends sprite {
         return LEFT;
     }
 
+    ImageView getLEFT_SMALL() {
+        LEFT_SMALL.setX(getX() + width);
+        LEFT_SMALL.setY(getY()+22.5);
+        return LEFT_SMALL;
+    }
+
     ImageView getDOWN() {
         DOWN.setX(getX()+20);
         DOWN.setY(getY()-10);
         return DOWN;
+    }
+
+    ImageView getDOWN_SMALL() {
+        DOWN_SMALL.setX(getX()+22.5);
+        DOWN_SMALL.setY(getY()-5);
+        return DOWN_SMALL;
     }
 
     ImageView getRIGHT() {
@@ -69,18 +136,32 @@ public class player extends sprite {
         return RIGHT;
     }
 
+    ImageView getRIGHT_SMALL() {
+        RIGHT_SMALL.setX(getX()-5);
+        RIGHT_SMALL.setY(getY()+22.5);
+        return RIGHT_SMALL;
+    }
+
     ImageView getCANNON() {
         CANNON.setX(getX());
         CANNON.setY(getY());
         return CANNON;
     }
 
-    void rotateCannon(double x, double y){
-        double deltaX = getX()+width/2 - x;
-        double deltaY = getY()+height/2 - y;
+    void rotateCannon(MouseEvent event){
+        mouseX = event.getX();
+        mouseY = event.getY();
 
+        double deltaX = getX()+width/2 - event.getX();
+        double deltaY = getY()+height/2 - event.getY();
         double angle = -Math.toDegrees(Math.atan2(deltaX, deltaY));
-//        System.out.println(angle);
+        CANNON.setRotate(angle);
+    }
+
+    void rotateCannon(){
+        double deltaX = getX()+width/2 - mouseX;
+        double deltaY = getY()+height/2 - mouseY;
+        double angle = -Math.toDegrees(Math.atan2(deltaX, deltaY));
         CANNON.setRotate(angle);
     }
 

@@ -2,8 +2,7 @@ package GameObjects;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
-
+import static GameObjects.game.*;
 
 class sprite extends ImageView{
 
@@ -66,20 +65,16 @@ class sprite extends ImageView{
         super.setY(y);
     }
 
-    private Circle getBoundary(){
-        return new Circle(getCenterX(),getCenterY(),width/2);
-    }
-
-    boolean intersects(sprite s) {
-        double deltaX = Math.abs(getCenterX()-s.getCenterX());
-        double deltaY = Math.abs(getCenterY()-s.getCenterY());
-
-        double distance = Math.sqrt( Math.pow(deltaX,2) + Math.pow(deltaY,2) );
-
-        return distance <= getWidth()/2 + s.getWidth()/2;
-
-
-//        return s.getBoundary().intersects(getBoundary().getBoundsInLocal());
-//        return s.getBoundary().intersects(getBoundary());
+    boolean isOutOfBounds(){
+        if(getX() > getGameDimX()){
+            return true;
+        }
+        if(getY() > getGameDimY()){
+            return true;
+        }
+        if(getX()-width < getGameDimX()){
+            return true;
+        }
+        return getY() - height < getGameDimY();
     }
 }

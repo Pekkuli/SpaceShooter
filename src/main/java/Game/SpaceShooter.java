@@ -11,7 +11,7 @@ public class SpaceShooter extends Application {
 
     private long lastUpdate;
     private static int time;
-    private static int updateRate = 60;
+    private static int updateRate = 120;
     private static Stage pStage;
 
     @Override
