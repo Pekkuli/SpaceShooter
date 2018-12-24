@@ -5,13 +5,16 @@ import java.util.Random;
 
 class asteroid extends sprite {
 
-    private double size;
     private static double minSize = 100;
     private static double maxSize = 350;
+
+    private double size;
     private double rotate;
+
     private boolean clockwise;
-    private long lastUpdate;
     private double spinningFrequency;
+
+    private long lastUpdate;
 
     asteroid(double x, double y) {
         super(x,y);
@@ -25,17 +28,18 @@ class asteroid extends sprite {
         clockwise = rng.nextInt(2) == 1;
         lastUpdate = 0;
 
-        setOnMouseClicked(event -> {
-            System.out.println("Asteroid at: "+getX()+","+getY()+" was clicked!");
-            if(size > minSize+25){
-                size -=25;
-                setImage("/images/asteroidi1.png",size,size);
-                setPosition(x - getWidth()/2, y - getHeight()/2);
-                updateSpinningFreq();
-            } else {
-                this.setVisible(false);
-            }
-        });
+//        setOnMouseClicked(event -> {
+//            System.out.println("Asteroid at: "+getX()+","+getY()+" was clicked!");
+//            double dmg = player.getDamage();
+//            if(size > minSize+dmg){
+//                size -=player.getDamage();
+//                setImage("/images/asteroidi1.png",size,size);
+//                setPosition(x - getWidth()/2, y - getHeight()/2);
+//                updateSpinningFreq();
+//            } else {
+//                this.setVisible(false);
+//            }
+//        });
 
         new AnimationTimer()
         {
@@ -53,11 +57,7 @@ class asteroid extends sprite {
                     setRotate(rotate);
                     lastUpdate = now;
 
-                    if(clockwise) {
-                        rotate += 360d / 30 / spinningFrequency;
-                    } else {
-                        rotate -= 360d / 30 / spinningFrequency;
-                    }
+                    addRotation();
                 }
             }
         }.start();
@@ -67,12 +67,42 @@ class asteroid extends sprite {
         spinningFrequency = Math.pow(size / maxSize, 1.5) * 10;
     }
 
+    private void addRotation(){
+        if(clockwise) {
+            rotate += 360d / 30 / spinningFrequency;
+        } else {
+            rotate -= 360d / 30 / spinningFrequency;
+        }
+    }
+
+    private double getSize(){
+        return size;
+    }
+
     boolean intersects(sprite s) {
         double deltaX = Math.abs(getCenterX()-s.getCenterX());
         double deltaY = Math.abs(getCenterY()-s.getCenterY());
         double distance = Math.sqrt( Math.pow(deltaX,2) + Math.pow(deltaY,2) );
 
         return distance <= getWidth()/2 + s.getWidth()/2;
+    }
+
+    boolean getHit(){
+        System.out.println("Asteroid at: "+roundDecimals(getX())+","+roundDecimals(getY())+", Size: "+roundDecimals(getSize())+" was hit!");
+        double dmg = player.getDamage();
+        if(size > minSize+dmg){
+            size -=dmg;
+            double x = getX();
+            double y = getY();
+
+            setImage("/images/asteroidi1.png",size,size);
+//            setPosition(x + getWidth()/2, y + getHeight()/2);
+            setPosition(x + dmg/2,y + dmg/2);
+            updateSpinningFreq();
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private static double getRandSize(){

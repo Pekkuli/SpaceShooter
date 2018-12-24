@@ -16,7 +16,8 @@ class player extends sprite {
     private double mouseX;
     private double mouseY;
 
-    private double firingSpeed = 5;
+    private static double damage = 5;
+    private double firingSpeed = 120;
 
     private ImageView UP;
     private ImageView UP_SMALL;
@@ -62,10 +63,7 @@ class player extends sprite {
                 long deltaTime = (now - lastUpdate)/1000000;
                 if(deltaTime >= (1000/firingSpeed) ){
 
-                    double deltaX = mouseX - getCenterX();
-                    double deltaY = mouseY - getCenterY();
-
-                    spawnProjectile(getCenterX(),getCenterY(),deltaX, deltaY);
+                    spawnProjectile(getCenterX(),getCenterY(),mouseX, mouseY);
 
                     lastUpdate = now;
                 }
@@ -165,15 +163,9 @@ class player extends sprite {
         CANNON.setRotate(angle);
     }
 
-//    @Override
-//    void setPositionX(double x) {
-//        super.setX(x);
-//    }
-//
-//    @Override
-//    void setPositionY(double y) {
-//        super.setY(y);
-//    }
+    static double getDamage() {
+        return damage;
+    }
 
     private void setVelocityX(double x){
         velocityX = x;
@@ -229,22 +221,6 @@ class player extends sprite {
             setVelocityY(-0.01);
         }
     }
-
-//    private Rectangle2D getBoundaryAfterXMovement(double newx){
-//        return new Rectangle2D(newx,positionY,width,height);
-//    }
-//
-//    private Rectangle2D getBoundaryAfterYMovement(double newy){
-//        return new javafx.geometry.Rectangle2D(positionX, newy,width,height);
-//    }
-//
-//    boolean intersectsAfterXMovement(sprite s, double newx) {
-//        return getBoundaryAfterXMovement(newx).intersects(s.getBoundary());
-//    }
-//
-//    boolean intersectsAfterYMovement(sprite s, double newy) {
-//        return getBoundaryAfterYMovement(newy).intersects(s.getBoundary());
-//    }
 
     @Override
     public String toString() {

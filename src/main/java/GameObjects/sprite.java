@@ -2,6 +2,7 @@ package GameObjects;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import java.text.DecimalFormat;
 import static GameObjects.game.*;
 
 class sprite extends ImageView{
@@ -66,15 +67,22 @@ class sprite extends ImageView{
     }
 
     boolean isOutOfBounds(){
-        if(getX() > getGameDimX()){
+        if((getX() > getGameDimX()) || (getY() > getGameDimY())){
             return true;
         }
-        if(getY() > getGameDimY()){
+        if(getX() + width < 0){
             return true;
         }
-        if(getX()-width < getGameDimX()){
+        if(getY() + height < 0){
             return true;
         }
-        return getY() - height < getGameDimY();
+        return false;
+    }
+
+    String roundDecimals(double number){
+        DecimalFormat df = new DecimalFormat("0.00");
+        String decimal = df.format(number);
+        decimal = decimal.replace(",",".");
+        return  decimal;
     }
 }

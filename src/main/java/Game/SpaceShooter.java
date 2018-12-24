@@ -12,11 +12,11 @@ public class SpaceShooter extends Application {
     private long lastUpdate;
     private static int time;
     private static int updateRate = 120;
-    private static Stage pStage;
+//    private static Stage pStage;
 
     @Override
     public void start(Stage primaryStage) {
-        pStage = primaryStage;
+//        pStage = primaryStage;
         lastUpdate = 0L;
         time = 0;
 
@@ -55,7 +55,7 @@ public class SpaceShooter extends Application {
         return updateRate;
     }
 
-    public static void updateScene(){
-        pStage.setScene(game.getGameScene());
-    }
+//    public static void updateScene(){
+//        pStage.setScene(game.getGameScene());
+//    }
 }

@@ -1,5 +1,6 @@
 package GameObjects;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -9,16 +10,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-
 import java.util.ArrayList;
-
 import static Game.SpaceShooter.*;
 
 public class game {
 
     private static player player;
-
-//    private static ArrayList<asteroid> asteroids;
     private static ArrayList<String> input;
 
     private static double dimX;
@@ -31,7 +28,6 @@ public class game {
 
     public game(double x, double y) {
         player = new player(0,0);
-//        asteroids = new ArrayList<>();
         input = new ArrayList<>();
         dimX = x;
         dimY = y;
@@ -48,7 +44,6 @@ public class game {
         background.setY(0);
 
         gameBox.getChildren().add(background);
-//        gameBox.getChildren().addAll(asteroids);
         gameBox.getChildren().addAll(player);
         gameBox.getChildren().addAll(player.getCANNON());
 
@@ -95,14 +90,18 @@ public class game {
             input.remove(keyInput);
         });
 
-        gameScene.setOnMouseDragged(event -> player.rotateCannon(event));
+        gameBox.setOnMouseDragged(event -> player.rotateCannon(event));
+        gameBox.setOnMouseMoved(event -> player.rotateCannon(event));
 
-        gameScene.setOnMousePressed(event -> {
-            player.rotateCannon(event);
-            player.startFiring();
+        gameBox.setOnMousePressed(event -> {
+//            player.rotateCannon(event);
+
+            if(event.getButton().toString().equals("PRIMARY")){
+                player.startFiring();
+            }
         });
 
-        gameScene.setOnMouseReleased(event -> player.stopFiring());
+        gameBox.setOnMouseReleased(event -> player.stopFiring());
 
         root.setCenter(gameBox);
         root.setTop(optionBox);
@@ -175,32 +174,52 @@ public class game {
 
         player.rotateCannon();
 
-        for(Node nd: gameBox.getChildren()){
+        ObservableList<Node> list = gameBox.getChildren();
+        for(int i = 0; i < list.size();i++){
+            Node nd = list.get(i);
+
             if(nd instanceof asteroid){
                 asteroid ast = (asteroid) nd;
-                if(ast.intersects(player)){
-                    gameBox.getChildren().remove(ast);
-                    break;
-//                System.out.println("Player is colliding with asteroid: "+ast);
+
+                ObservableList<Node> listproj = gameBox.getChildren();
+
+                for(int j = 0; j < listproj.size();j++){
+
+                    Node pro = listproj.get(j);
+                    if(pro instanceof projectile){
+                        if (ast.intersects((projectile)pro)){
+                            list.remove(pro);
+                            if(ast.getHit()){
+                                list.remove(ast);
+                            }
+                        }
+                    }
                 }
+
+//                if(ast.intersects(player)){
+//                    list.remove(ast);
+//                    break;
+//                }
             }
             if(nd instanceof projectile){
                 projectile pro = (projectile) nd;
-                pro.update((double) 1000/ getUpdateRate());
-
-//                if(pro.isOutOfBounds()){
-//                    gameBox.getChildren().remove(pro);
-//                }
+                if(!pro.isOutOfBounds()){
+                    pro.update((double) 1000/ getUpdateRate());
+                } else {
+                    list.remove(pro);
+                }
             }
         }
     }
 
+//    public static player getPlayer() {
+//        return player;
+//    }
+
     private static void spawnAsteroid(double x, double y) {
         asteroid ast = new asteroid(x,y);
         ast.setPosition(x-ast.getWidth()/2, y-ast.getHeight()/2);
-
         gameBox.getChildren().add(ast);
-//        asteroids.add(ast);
     }
 
     private void mouseClick(MouseEvent event){
@@ -209,21 +228,19 @@ public class game {
             case PRIMARY:
 //                double deltaX = event.getX() - player.getCenterX();
 //                double deltaY = event.getY() - player.getCenterY();
-//
 //                spawnProjectile(player.getCenterX(),player.getCenterY(),deltaX, deltaY);
-
-//              do left click
+//              do left getHit
 
                 break;
             case SECONDARY:
 
                 spawnAsteroid(event.getX(),event.getY());
-//                do right click
+//                do right getHit
 
                 break;
             case MIDDLE:
 
-//                do middle click
+//                do middle getHit
 
                 break;
             case NONE:
@@ -308,92 +325,9 @@ public class game {
         }
     }
 
-    static void spawnProjectile(double x, double y, double deltax, double deltay){
-        gameBox.getChildren().add(new projectile(x,y,deltax,deltay));
+    static void spawnProjectile(double x, double y, double mousex, double mousey){
+        gameBox.getChildren().add(new projectile(x,y,mousex,mousey));
     }
-
-//    private void changeLevel() {
-//
-//        if(player.intersects(door)){
-//            System.out.println("Changing level!");
-//            createNewLevel();
-//        }
-//
-//        if(player.getPositionX() + player.getWidth() > dimX - 20) {
-//
-//        }
-//    }
-//
-//    public void createNewLevel(){
-//    }
-//
-//    private void spawnDoor(double y){
-//        double width = getGameDimX() - 56;
-//        double height = y - 148;
-//        door.setPosition(width,height);
-//    }
-//
-//    public void render(){
-//        player.render();
-//        for(asteroid pt: asteroids){
-//            pt.render();
-//        }
-//        door.render();
-//    }
-//
-//    static double getGravity(){
-//        return gravity;
-//    }
-//
-//    private void createPlatform(double x, double y){
-//        double length = 100 + new Random().nextDouble()*(150 - 100);
-//        platform pt = new platform(x - length/2,y - ((double) 75 / 2),length);
-//        platforms.add(pt);
-//    }
-//
-//    static boolean playerCollidesAfterX(double newx){
-//        for(platform pt: platforms){
-//            if(player.intersectsAfterXMovement(pt,newx)){
-//
-//                if ((!(player.getPositionX() > pt.getPositionX()) || !(player.getPositionX() < pt.getPositionX() + pt.getWidth())) &&
-//                    player.getPositionY() < (pt.getPositionY()+pt.getHeight()) ) {
-//                    double deltax = pt.getPositionX() - player.positionX;
-//
-//                    if(deltax > 0) {
-//                        player.setPositionX(pt.getPositionX()-player.getWidth()-2);
-//                    } else {
-//                        player.setPositionX(pt.getPositionX()+pt.getWidth()+2);
-//                    }
-//                    return true;
-//                } else {
-//                    return false;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-//
-//    static boolean playerCollidesAfterY(double newy){
-//        for(platform pt: platforms){
-//            if(player.intersectsAfterYMovement(pt,newy)){
-//
-//                double deltaY = pt.getPositionY() - player.positionY;
-//
-//                if(deltaY > 0) {
-//                    player.setStatus("on platform");
-//                    player.setPositionY(pt.getPositionY()-player.getHeight()+getGrassPixelsHeight());
-//                    player.setOnGround(true);
-//                    player.setVelocityY(0);
-//                } else {
-//                    player.setPositionY(pt.getPositionY()+pt.getHeight()+2);
-//                    player.setOnGround(false);
-//                    player.setVelocityY(0);
-//                }
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     static double getGameDimX() {
         return dimX;
@@ -411,7 +345,7 @@ public class game {
 
     private String getDebugInfo(){
         return "Time: " + getTime()/getUpdateRate()+", Position: " + (short) player.getPositionX()+" ("+(short)(player.getPositionX()
-                + player.getWidth())+"), "+(short) player.getPositionY()+" ("+(short)(player.getPositionY()+ player.getHeight())+")"
+                + player.getWidth())+"), "+(short) player.getPositionY()+" ("+(short)(player.getPositionY()+ player.getHeight())+")" + "Game objects: "+gameBox.getChildren().size()
                 +"\nwidth: "+ player.getWidth()+", height: "+ player.getHeight()
                 +", Velocity: "+ player.getVelocityX()+","+ player.getVelocityY();
     }
