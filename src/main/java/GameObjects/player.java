@@ -16,8 +16,8 @@ class player extends sprite {
     private double mouseX;
     private double mouseY;
 
-    private static double damage = 5;
-    private double firingSpeed = 120;
+    private static double damage = 15;
+    private double firingSpeed = 60;
 
     private ImageView UP;
     private ImageView UP_SMALL;
@@ -62,7 +62,6 @@ class player extends sprite {
 
                 long deltaTime = (now - lastUpdate)/1000000;
                 if(deltaTime >= (1000/firingSpeed) ){
-
                     spawnProjectile(getCenterX(),getCenterY(),mouseX, mouseY);
 
                     lastUpdate = now;

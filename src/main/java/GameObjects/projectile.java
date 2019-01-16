@@ -26,7 +26,7 @@ class projectile extends sprite {
 //
 //        double ratiox = Math.abs(deltax)/(Math.abs(deltax)+Math.abs(deltay));
 //        double ratioy = Math.abs(deltay)/(Math.abs(deltax)+Math.abs(deltay));
-
+        
         if(deltax2.doubleValue() < 0){
             speedX = -1*ratiox2.doubleValue()* speed;
         } else {

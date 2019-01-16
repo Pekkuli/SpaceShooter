@@ -167,10 +167,11 @@ public class game {
 
         player.update((double) 1000/ getUpdateRate());
 
-        addFlameEffectUP(w,ctrl);
-        addFlameEffectLeft(a,ctrl);
-        addFlameEffectDOWN(s,ctrl);
-        addFlameEffectRIGHT(d,ctrl);
+        addFlameEffects(w, a, s, d, ctrl);
+//        addFlameEffectUP(w,ctrl);
+//        addFlameEffectLeft(a,ctrl);
+//        addFlameEffectDOWN(s,ctrl);
+//        addFlameEffectRIGHT(d,ctrl);
 
         player.rotateCannon();
 
@@ -248,6 +249,13 @@ public class game {
         }
     }
 
+    private void addFlameEffects(boolean w,boolean a, boolean s, boolean d, boolean ctrl){
+        addFlameEffectUP(w,ctrl);
+        addFlameEffectLeft(a,ctrl);
+        addFlameEffectDOWN(s,ctrl);
+        addFlameEffectRIGHT(d,ctrl);
+    }
+
     private void addFlameEffectUP(boolean on, boolean ctrl){
         if(on){
 
@@ -266,6 +274,23 @@ public class game {
             gameBox.getChildren().remove(player.getUP());
             gameBox.getChildren().remove(player.getUP_SMALL());
         }
+//        if(on){
+//
+//            if (!ctrl){
+//                if(player.getUP().isVisible()){
+//                    player.getUP().setVisible(true);
+//                    player.getUP_SMALL().setVisible(false);
+//                }
+//            } else {
+//                if(!player.getUP_SMALL().isVisible()){
+//                    player.getUP_SMALL().setVisible(true);
+//                    player.getUP().setVisible(false);
+//                }
+//            }
+//        } else {
+//            player.getUP().setVisible(false);
+//            player.getUP_SMALL().setVisible(false);
+//        }
     }
 
     private void addFlameEffectLeft(boolean on, boolean ctrl){
